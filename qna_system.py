@@ -153,6 +153,8 @@ st.header("2. Ask a Question")
 question = st.text_input("What would you like to know about the text you uploaded?")
 
 if st.button("Get Answer"):
+    st.session_state['saved_chunks'] = saved_chunks
+    st.session_state['sample_vector'] = sample_vector
     if question and conn:
         with st.spinner("Searching database and thinking..."):
             relevant_chunks = search_similar_chunks(question)
