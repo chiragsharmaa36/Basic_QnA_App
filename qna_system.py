@@ -14,13 +14,14 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 @st.cache_resource
 def init_db():
     try:
-        conn = psycopg2.connect(
-            dbname=st.secrets["POSTGRES_DB"],
-            user=st.secrets["POSTGRES_USER"],
-            password=st.secrets["POSTGRES_PASSWORD"],
-            host=st.secrets["POSTGRES_HOST"],
-            port=st.secrets["POSTGRES_PORT"]
-        )
+        # conn = psycopg2.connect(
+        #     dbname=st.secrets["POSTGRES_DB"],
+        #     user=st.secrets["POSTGRES_USER"],
+        #     password=st.secrets["POSTGRES_PASSWORD"],
+        #     host=st.secrets["POSTGRES_HOST"],
+        #     port=st.secrets["POSTGRES_PORT"]
+        # )
+        conn = psycopg2.connect(DATABASE_URL)
         print("✅ Database connected")
         return conn
     except Exception as e:
