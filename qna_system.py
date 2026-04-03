@@ -132,8 +132,7 @@ if st.button("Get Answer"):
                 st.warning("No context found. Did you upload text first?")
             else:
                 answer = generate_answer(question, relevant_chunks)
-                st.session_state.chat_history.append({"role": "user", "text": question})
-                st.session_state.chat_history.append({"role": "ai", "text": answer})
+                st.session_state.chat_history.append({"role": "ai", "text": answer, "relevant_chunks": relevant_chunks})
 
 # ✅ Chat history rendered OUTSIDE the button block — persists across reruns
 for msg in st.session_state.chat_history:
@@ -142,3 +141,9 @@ for msg in st.session_state.chat_history:
     else:
         st.write("### ✨ AI Answer:")
         st.success(msg["text"])
+
+        st.write("---")
+        st.write("### 🔍 How it found this answer:")
+        st.write("We converted your question into a vector, compared it against the database, and pulled these closest matches. The AI *only* saw this text:")
+        for i, chunk in enumerate(msg["relevant_chunks"]):
+            st.code(f"Retrieved Context {i+1}:\n{chunk}", language="text")
