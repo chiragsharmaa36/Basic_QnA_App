@@ -39,12 +39,11 @@ def process_and_store_text(raw_text):
     sample_embedding = None # We will grab one embedding to show you on screen
     
     for i, chunk in enumerate(chunks):
-        # Get the embedding from Gemini (Forced to 768 dimensions)
+        # Get the native 768-dimension embedding
         result = genai.embed_content(
-            model="models/gemini-embedding-001",
+            model="models/text-embedding-004", 
             content=chunk,
-            task_type="retrieval_document",
-            output_dimensionality=768
+            task_type="retrieval_document"
         )
         embedding = result['embedding']
         
@@ -66,10 +65,9 @@ def process_and_store_text(raw_text):
 def search_similar_chunks(user_question, limit=3):
     # Convert the user's question into a Gemini embedding
     result = genai.embed_content(
-        model="gemini-embedding-001",
+        model="models/text-embedding-004", 
         content=user_question,
-        task_type="retrieval_query",
-        output_dimensionality=768
+        task_type="retrieval_query"
     )
     question_embedding = result['embedding']
     
