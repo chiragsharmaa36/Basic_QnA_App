@@ -15,11 +15,11 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 def init_db():
     try:
         conn = psycopg2.connect(
-            dbname=os.getenv("POSTGRES_DB"),
-            user=os.getenv("POSTGRES_USER"),
-            password=os.getenv("POSTGRES_PASSWORD", ""),
-            host=os.getenv("POSTGRES_HOST"),
-            port=os.getenv("POSTGRES_PORT")
+            dbname=st.secrets["POSTGRES_DB"],
+            user=st.secrets["POSTGRES_USER"],
+            password=st.secrets["POSTGRES_PASSWORD"],
+            host=st.secrets["POSTGRES_HOST"],
+            port=st.secrets["POSTGRES_PORT"]
         )
         print("✅ Database connected")
         return conn
