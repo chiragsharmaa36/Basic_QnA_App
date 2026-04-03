@@ -248,7 +248,7 @@ Machine Learning enables computers to learn from data without explicit programmi
 
 ## 🌐 Deployment
 
-### **Option 1: Streamlit Cloud (Recommended)**
+### **Streamlit Cloud (Recommended)**
 ```bash
 # Push to GitHub
 git push origin main
@@ -267,37 +267,6 @@ POSTGRES_HOST = "your_host"
 POSTGRES_PORT = 5432
 ```
 
-### **Option 2: Docker (Self-Hosted)**
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY qna_system.py .
-EXPOSE 8501
-
-CMD ["streamlit", "run", "qna_system.py"]
-```
-
-```bash
-docker build -t qna-system .
-docker run -p 8501:8501 --env-file .env qna-system
-```
-
-### **Option 3: Heroku**
-```bash
-heroku login
-heroku create your-app-name
-git push heroku main
-```
-
-### **Option 4: Railway / Render**
-- Connect your GitHub repo
-- Set environment variables in dashboard
-- Auto-deploy on push
-
 ---
 
 ## 🔐 Security Considerations
@@ -315,7 +284,7 @@ git push heroku main
 ```
 streamlit==1.28.1
 google-generativeai==0.3.0
-psycopg2-binary==2.9.9
+psycopg2==2.9.9
 python-dotenv==1.0.0
 ```
 
