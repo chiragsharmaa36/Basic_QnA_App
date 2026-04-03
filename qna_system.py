@@ -7,6 +7,7 @@ from google.generativeai import types
 
 # --- 1. SETUP & CONFIGURATION ---
 load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Configure the free Gemini API
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
