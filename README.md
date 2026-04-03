@@ -1,6 +1,14 @@
 # 🧠 Free AI Q&A System
 
-A powerful, free AI-powered question-answering system that uses **Google Gemini API** for embeddings and text generation, combined with **PostgreSQL** for vector similarity search. Upload any document, ask questions, and get intelligent answers based only on your uploaded content.
+A powerful, free AI-powered question-answering system that uses **Google Gemini API** for embeddings and text generation, combined with **Supabase** (PostgreSQL + pgvector) for vector similarity search. Upload any document, ask questions, and get intelligent answers based only on your uploaded content.
+
+---
+
+## 🚀 Live Demo
+
+**Try it now:** [https://rag-basic-qna-app.streamlit.app/](https://rag-basic-qna-app.streamlit.app/)
+
+Deployed on **Streamlit Cloud** with **Supabase** backend.
 
 ---
 
@@ -25,7 +33,7 @@ Split by Paragraphs (\\n\\n)
     ↓
 Generate 768-Dimensional Vectors (Gemini Embeddings)
     ↓
-Store in PostgreSQL with pgvector
+Store in Supabase (PostgreSQL + pgvector)
 ```
 
 ### 2. **Question & Answer**
@@ -58,7 +66,7 @@ Basic_QnA_System/
 ## 📋 Requirements
 
 - **Python 3.8+**
-- **PostgreSQL 14+** with pgvector extension installed
+- **Supabase Account** (free tier at https://supabase.com)
 - **Google Gemini API Key** (free tier available)
 - **Internet connection** (for API calls)
 
@@ -82,14 +90,19 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. **Set Up PostgreSQL Database**
+### 4. **Set Up Supabase Database**
 
-**Install pgvector extension:**
+**1. Create a Supabase Project:**
+- Go to [https://supabase.com](https://supabase.com) and sign up (free tier)
+- Create a new project
+- Go to **SQL Editor** and run the following:
+
+**2. Enable pgvector extension:**
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
-**Create the document_chunks table:**
+**3. Create the document_chunks table:**
 ```sql
 CREATE TABLE document_chunks (
     id SERIAL PRIMARY KEY,
@@ -102,6 +115,10 @@ CREATE TABLE document_chunks (
 CREATE INDEX ON document_chunks USING ivfflat (embedding vector_cosine_ops);
 ```
 
+**4. Get Connection String:**
+- In Supabase dashboard → **Settings → Database → Connection pooling**
+- Copy the connection string
+
 ### 5. **Configure Environment Variables**
 
 Create a `.env` file in the project root:
@@ -109,15 +126,17 @@ Create a `.env` file in the project root:
 # Google Gemini API
 GEMINI_API_KEY=your_gemini_api_key_here
 
-# PostgreSQL Database
-POSTGRES_DB=qna_db
-POSTGRES_USER=your_username
-POSTGRES_PASSWORD=your_password
-POSTGRES_HOST=localhost
+# Supabase Database (copy from connection string)
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres.xxxxxxxxxxxxxxx
+POSTGRES_PASSWORD=your_supabase_password
+POSTGRES_HOST=db.xxxxxxxxxxxxxxx.supabase.co
 POSTGRES_PORT=5432
 ```
 
-**Get a free Gemini API key:** https://ai.google.dev/
+**Get API Keys:**
+- **Gemini API key:** https://ai.google.dev/
+- **Supabase connection string:** Settings → Database → Connection pooling
 
 ---
 
@@ -182,7 +201,8 @@ Machine Learning enables computers to learn from data without explicit programmi
         └────────────────┼───────────────┘
                          ↓
         ┌────────────────────────────────┐
-        │   PostgreSQL + pgvector        │
+        │   Supabase (PostgreSQL +       │
+        │         pgvector)              │
         │  (Vector Storage & Search)     │
         └────────────────────────────────┘
                          │
@@ -201,7 +221,7 @@ Machine Learning enables computers to learn from data without explicit programmi
 |-----------|---------|
 | **Chunking** | Splits text into manageable pieces for embedding |
 | **Embeddings** | Converts text into 768-dimensional vectors (semantic meaning) |
-| **Vector DB** | PostgreSQL with pgvector for fast similarity search |
+| **Vector DB** | Supabase (PostgreSQL + pgvector) for fast similarity search |
 | **Cosine Distance** | Measure similarity between vectors (`<->` operator) |
 | **Gemini API** | Generates human-like answers based on context |
 
@@ -210,9 +230,10 @@ Machine Learning enables computers to learn from data without explicit programmi
 ## 🚨 Troubleshooting
 
 ### **"Database connection failed"**
-- Ensure PostgreSQL is running
-- Check `.env` file credentials
-- Verify `document_chunks` table exists
+- Check Supabase project is active
+- Verify Supabase credentials in `.env`
+- Ensure `document_chunks` table exists in Supabase
+- Check if using **Connection pooling** endpoint
 
 ### **"No context found. Did you upload text first?"**
 - Upload text first using the sidebar
@@ -224,8 +245,8 @@ Machine Learning enables computers to learn from data without explicit programmi
 - Restart the Streamlit app
 
 ### **Slow search performance**
-- Ensure index is created on embeddings column
-- Check table size with `SELECT COUNT(*) FROM document_chunks;`
+- Verify ivfflat index is created: `SELECT * FROM pg_indexes WHERE tablename='document_chunks';`
+- Supabase free tier: limit document size or upgrade plan
 
 ---
 
@@ -241,31 +262,70 @@ Machine Learning enables computers to learn from data without explicit programmi
 ## 💰 Cost Estimation
 
 - **Gemini API** — Free tier (60 requests/min, embeddings free)
-- **PostgreSQL** — Self-hosted (free) or managed database ($10-100+/month)
-- **Streamlit** — Community Cloud (free) or Streamlit Cloud
+- **Supabase** — Free tier (excellent for this project, $25+/month for production)
+- **Streamlit** — Community Cloud (free) or [Streamlit Cloud](https://streamlit.io/cloud)
 
 ---
 
 ## 🌐 Deployment
 
-### **Streamlit Cloud (Recommended)**
+### **Option 1: Streamlit Cloud (Recommended)** ✨ **[LIVE DEMO](https://rag-basic-qna-app.streamlit.app/)**
+
 ```bash
-# Push to GitHub
+# 1. Push code to GitHub
 git push origin main
 
-# Connect repo to Streamlit Cloud
-# https://streamlit.io/cloud
+# 2. Create secrets in Streamlit Cloud
 ```
 
-Create `secrets.toml` in `.streamlit/secrets.toml`:
+In Streamlit Cloud dashboard, add these secrets in **Settings → Secrets**:
 ```toml
-GEMINI_API_KEY = "your_key"
-POSTGRES_DB = "qna_db"
-POSTGRES_USER = "user"
-POSTGRES_PASSWORD = "password"
-POSTGRES_HOST = "your_host"
-POSTGRES_PORT = 5432
+GEMINI_API_KEY = "your_gemini_key"
+POSTGRES_DB = "postgres"
+POSTGRES_USER = "postgres.xxxxxxxx"
+POSTGRES_PASSWORD = "your_supabase_password"
+POSTGRES_HOST = "db.xxxxx.supabase.co"
+POSTGRES_PORT = "5432"
 ```
+
+---
+
+### **Option 2: Docker (Self-Hosted)**
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY qna_system.py .
+EXPOSE 8501
+
+CMD ["streamlit", "run", "qna_system.py"]
+```
+
+```bash
+docker build -t qna-system .
+docker run -p 8501:8501 --env-file .env qna-system
+```
+
+### **Option 3: Heroku**
+```bash
+heroku login
+heroku create your-app-name
+heroku config:set GEMINI_API_KEY="your_key"
+heroku config:set POSTGRES_HOST="db.xxxxx.supabase.co"
+heroku config:set POSTGRES_USER="postgres.xxxxxxxx"
+heroku config:set POSTGRES_PASSWORD="your_password"
+heroku config:set POSTGRES_DB="postgres"
+heroku config:set POSTGRES_PORT="5432"
+git push heroku main
+```
+
+### **Option 4: Railway / Render**
+- Connect your GitHub repo
+- Set Supabase environment variables in dashboard
+- Auto-deploy on push
 
 ---
 
@@ -283,8 +343,8 @@ POSTGRES_PORT = 5432
 
 ```
 streamlit==1.28.1
-google-generativeai==0.3.0
-psycopg2==2.9.9
+google-generativeai==0.8.6
+psycopg2-binary==2.9.9
 python-dotenv==1.0.0
 ```
 
@@ -309,9 +369,9 @@ This project is open source. Feel free to use and modify.
 
 ## 📞 Support
 
-- **Google Gemini API Docs** — https://ai.google.dev/docs
+- **Google Gemini API Docs** — https://ai.google.dev/
 - **Streamlit Docs** — https://docs.streamlit.io/
-- **PostgreSQL Docs** — https://www.postgresql.org/docs/
+- **Supabase Docs** — https://supabase.com/docs
 - **pgvector Docs** — https://github.com/pgvector/pgvector
 
 ---
