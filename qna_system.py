@@ -32,6 +32,10 @@ def init_db():
 conn = init_db()
 cursor = conn.cursor() if conn else None
 
+# Create an empty list to hold the chat history if it doesn't exist yet
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
 # --- 2. CHUNKING & STORING (GEMINI VERSION) ---
 def process_and_store_text(raw_text):
     chunks = [chunk.strip() for chunk in raw_text.split('\n\n') if chunk.strip()]
@@ -120,24 +124,27 @@ with st.sidebar:
             with st.spinner("Chunking and generating Gemini embeddings..."):
                 # Catch the new return values
                 saved_chunks, sample_vector = process_and_store_text(document_text)
-                
+                # THE FIX: Save it to Streamlit's memory vault
+                st.session_state['saved_chunks'] = saved_chunks
+                st.session_state['sample_vector'] = sample_vector
             st.success(f"Saved {len(saved_chunks)} chunks to the database!")
             
             # --- THE BLACK BOX BREAKER ---
             st.markdown("---")
             st.subheader("🕵️‍♂️ Under the Hood")
             
-            with st.expander("1. See the Text Chunks"):
-                st.write("We split your text by paragraphs. Here is exactly how the database stored it:")
-                for i, chunk in enumerate(saved_chunks):
-                    st.info(f"**Chunk {i+1}:** {chunk}")
-                    
-            with st.expander("2. See the Vector Embeddings"):
-                st.write("The AI turns every chunk into an array of 768 numbers. Here are the first 15 numbers of **Chunk 1**:")
-                # We only show 15 so it doesn't crash your browser tab!
-                preview = sample_vector[:15]
-                preview.append("... and 753 more numbers!")
-                st.json(preview)
+            if 'saved_chunks' in st.session_state and 'sample_vector' in st.session_state:
+                with st.expander("1. See the Text Chunks"):
+                    st.write("We split your text by paragraphs. Here is exactly how the database stored it:")
+                    for i, chunk in enumerate(saved_chunks):
+                        st.info(f"**Chunk {i+1}:** {chunk}")
+                        
+                with st.expander("2. See the Vector Embeddings"):
+                    st.write("The AI turns every chunk into an array of 768 numbers. Here are the first 15 numbers of **Chunk 1**:")
+                    # We only show 15 so it doesn't crash your browser tab!
+                    preview = sample_vector[:15]
+                    preview.append("... and 753 more numbers!")
+                    st.json(preview)
                 
         else:
             st.warning("Please paste some text first.")
@@ -154,6 +161,9 @@ if st.button("Get Answer"):
                 st.warning("No context found. Did you upload text first?")
             else:
                 answer = generate_answer(question, relevant_chunks)
+                # Save BOTH the user's question and AI's answer into the vault
+                st.session_state.chat_history.append({"role": "user", "text": question})
+                st.session_state.chat_history.append({"role": "ai", "text": answer})
                 
                 # Show the final AI Answer
                 st.write("### ✨ AI Answer:")
